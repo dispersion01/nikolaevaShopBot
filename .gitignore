@@ -37,5 +37,5 @@ build/
 ### Mac OS ###
 .DS_Store
 
-#токен бота
+#конфигурационные данные бота
 config.properties

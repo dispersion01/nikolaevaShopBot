@@ -27,6 +27,7 @@ public class BotApp extends TelegramLongPollingBot {
         loadProperties();
     }
 
+    // загрузка данных для подключения
     private void loadProperties() {
         Properties properties = new Properties();
         try (InputStream input = getClass().getClassLoader().getResourceAsStream("config.properties")) {
@@ -44,6 +45,7 @@ public class BotApp extends TelegramLongPollingBot {
         }
     }
 
+    //опбработка команд бота
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
@@ -62,8 +64,7 @@ public class BotApp extends TelegramLongPollingBot {
                     response.setText("Я могу выполнять команду /bill");
                     break;
                 case "/bill":
-                    sendInvoice("chatId", "title", "description", "test", "RUB", "500",
-                            "11111");
+                    sendInvoice(chatId);
                     break;
                 default:
                     response.setText("Неизвестная команда. Попробуйте /start или /help.");
@@ -87,52 +88,18 @@ public class BotApp extends TelegramLongPollingBot {
     }
 
 
-    public void sendInvoice(String chatId, String title,
-                            String description, String payload,
-                            String currency, String prices, String provider_token) {
-      /*  try {
-            URL urlPayment = new URL(TELEGRAM_API_URL);
-
-            HttpURLConnection connect = (HttpURLConnection) urlPayment.openConnection();
-            String requestMethod = connect.getRequestMethod();
-            connect.setRequestProperty("Content-Type", "application/json; utf-8");
-            connect.setRequestProperty("Accept", "application/json");
-            connect.setDoOutput(true);
-            String jsonInputString = String.format(
-                    "{\"chat_id\":\"%s\", " +
-                            "\"title\":\"%s\", " +
-                            "\"description\":\"%s\", " +
-                            "\"payload\":\"%s\", " +
-                            "" +
-                            "\"provider_token\":\"%s\"," +
-                            " \"currency\":\"%s\", " +
-                            "\"prices\":%s}",
-                    chatId, title, description, payload, provider_token, currency, prices);
-            try (OutputStream os = connect.getOutputStream()) {
-                byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
-                os.write(input, 0, input.length);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } */
+    public void sendInvoice(String chatId) {
 
         // Создание счета
         SendInvoice invoice = new SendInvoice();
-        invoice.setChatId(chatId); // Установка идентфикатора чата
+        invoice.setChatId(chatId); // Установка идентфикатора чата, возвращается после команды /start
         invoice.setTitle("Название товара"); // Название инвойса
         invoice.setDescription("Описание товара"); // Описание инвойса
-        invoice.setProviderToken(providerToken); // Токен провайдера платежей (например, Stripe)
-        //invoice.setProviderToken("YOUR_PROVIDER_TOKEN"); // Токен провайдера платежей (например, Stripe)
-        // invoice.setProviderToken("7010944257:TEST:f3d034f7-9c19-4ffa-84c2-d8df24b13e61"); // Токен провайдера платежей
-        invoice.setStartParameter("payment"); // Начальный параметр платежа
-        invoice.setCurrency("RUB"); // Валюта
-        invoice.setPrices(Collections.singletonList(new LabeledPrice("Название товара", 5000))); // Цена в копейках (5000 копеек = 50 USD)
+        invoice.setProviderToken(providerToken); // Токен провайдера платежей
+        invoice.setCurrency("USD"); // Валюта
+        invoice.setPrices(Collections.singletonList(new LabeledPrice("Название товара", 100))); // Цена в копейках (5000 копеек = 50 USD)
         invoice.getPayload();
-        invoice.setPayload("https://api.telegram.org/bot7792446993:AAH6WBI9DXpjA5OvfwT65Yzvt7LrsBfpWYI/sendInvoice");
+        invoice.setPayload("https://api.telegram.org/bot" + botToken + "/sendInvoice");
 
         try {
             execute(invoice); // Отправка инвойса
